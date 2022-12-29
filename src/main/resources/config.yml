@@ -1,0 +1,13 @@
+ip: 10.10.0.51
+port: 25565
+interval: 1
+username: "none"
+password: "none"
+load-data: true
+write-history: true
+server-names:
+  - survival
+  - lobby
+
+server-name: lobby
+main-server-name: lobby
