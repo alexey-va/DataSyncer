@@ -97,7 +97,7 @@ public final class DataSyncer extends JavaPlugin implements Listener {
         historyConfiguration = YamlConfiguration.loadConfiguration(historyFile);
 
 
-        getCommand("datasyncer").setExecutor((sender, command, label, args) -> {
+        getCommand("emsync").setExecutor((sender, command, label, args) -> {
             if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
                 onDisable();
                 onEnable();
@@ -174,12 +174,21 @@ public final class DataSyncer extends JavaPlugin implements Listener {
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
+
+                                    PlayerData data = PlayerData.getPlayerData(player.getUniqueId());
+
                                     PlayerData.setCurrency(player.getUniqueId(), Double.parseDouble(finalLatestMap.get("currency")));
                                     PlayerData.setActiveGuildLevel(player.getUniqueId(), Integer.parseInt(finalLatestMap.get("guild-level")));
                                     PlayerData.setGuildPrestigeLevel(player.getUniqueId(), Integer.parseInt(finalLatestMap.get("prestige")));
                                     PlayerData.setHighestLevelKilled(player.getUniqueId(), Integer.parseInt(finalLatestMap.get("highest-level-killed")));
                                     PlayerData.setMaxGuildLevel(player.getUniqueId(), Integer.parseInt(finalLatestMap.get("max-guild-level")));
                                     PlayerData.setUseBookMenus(player, Boolean.parseBoolean(finalLatestMap.get("use-book")));
+                                    PlayerData.setDismissEMStatusScreenMessage(player, Boolean.parseBoolean(finalLatestMap.get("dismiss-em-status")));
+
+                                    data.setScore(Integer.parseInt(finalLatestMap.get("score")));
+                                    data.setKills(Integer.parseInt(finalLatestMap.get("kills")));
+                                    data.setDeaths((Integer.parseInt(finalLatestMap.get("deaths"));
+
                                     getLogger().info("Data for player " + event.getPlayer().getName() + " was uploaded.");
                                 }
                             }.runTask(plugin);
@@ -223,6 +232,10 @@ public final class DataSyncer extends JavaPlugin implements Listener {
         int hlk = PlayerData.getHighestLevelKilled(player.getUniqueId());
         int mgl = PlayerData.getMaxGuildLevel(player.getUniqueId());
         boolean book = PlayerData.getUseBookMenus(player.getUniqueId());
+        boolean dismiss = PlayerData.getDismissEMStatusScreenMessage(player.getUniqueId());
+        int deaths = PlayerData.getDeaths(player.getUniqueId());
+        int kills = PlayerData.getKills(player.getUniqueId());
+        int score = PlayerData.getScore(player.getUniqueId());
         long time = System.currentTimeMillis();
         Map<String, String> map = new HashMap<>();
         map.put("currency", currency + "");
@@ -231,7 +244,11 @@ public final class DataSyncer extends JavaPlugin implements Listener {
         map.put("highest-level-killed", hlk + "");
         map.put("max-guild-level", mgl + "");
         map.put("use-book", book + "");
+        map.put("dismiss-em-status", dismiss+"");
         map.put("timestamp", time + "");
+        map.put("deaths", deaths+"");
+        map.put("kills", kills+"");
+        map.put("score", score+"");
         return map;
     }
 
