@@ -102,7 +102,8 @@ public final class DataSyncer extends JavaPlugin implements Listener {
                 onDisable();
                 onEnable();
                 return true;
-            } else {
+            }
+            else {
                 sender.sendMessage("Wrong command! Type /datasyncer reload to reload config.");
             }
             return false;
@@ -128,8 +129,7 @@ public final class DataSyncer extends JavaPlugin implements Listener {
             @Override
             public void run() {
                 Map<String, String> latestMap = null;
-                long serverMs = playerConfiguration.getLong(event.getPlayer().getUniqueId().toString() + ".timestamp", -1);
-                long latestMs = serverMs;
+                long latestMs = playerConfiguration.getLong(event.getPlayer().getUniqueId().toString() + ".timestamp", -1);
                 String latestName = null;
                 for (String serverName : serverNames) {
                     Map<String, String> map = pool.hgetAll("EMData:" + serverName + ":" + event.getPlayer().getUniqueId().toString());
@@ -174,20 +174,18 @@ public final class DataSyncer extends JavaPlugin implements Listener {
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
-
                                     PlayerData data = PlayerData.getPlayerData(player.getUniqueId());
 
-                                    PlayerData.setCurrency(player.getUniqueId(), Double.parseDouble(finalLatestMap.get("currency")));
-                                    PlayerData.setActiveGuildLevel(player.getUniqueId(), Integer.parseInt(finalLatestMap.get("guild-level")));
-                                    PlayerData.setGuildPrestigeLevel(player.getUniqueId(), Integer.parseInt(finalLatestMap.get("prestige")));
-                                    PlayerData.setHighestLevelKilled(player.getUniqueId(), Integer.parseInt(finalLatestMap.get("highest-level-killed")));
-                                    PlayerData.setMaxGuildLevel(player.getUniqueId(), Integer.parseInt(finalLatestMap.get("max-guild-level")));
-                                    PlayerData.setUseBookMenus(player, Boolean.parseBoolean(finalLatestMap.get("use-book")));
-                                    PlayerData.setDismissEMStatusScreenMessage(player, Boolean.parseBoolean(finalLatestMap.get("dismiss-em-status")));
-
+                                    data.setCurrency(Double.parseDouble(finalLatestMap.get("currency")));
+                                    data.setActiveGuildLevel(Integer.parseInt(finalLatestMap.get("guild-level")));
+                                    data.setGuildPrestigeLevel(Integer.parseInt(finalLatestMap.get("prestige")));
+                                    data.setHighestLevelKilled(Integer.parseInt(finalLatestMap.get("highest-level-killed")));
+                                    data.setMaxGuildLevel(Integer.parseInt(finalLatestMap.get("max-guild-level")));
+                                    data.setUseBookMenus(Boolean.parseBoolean(finalLatestMap.get("use-book")));
+                                    data.setDismissEMStatusScreenMessage(Boolean.parseBoolean(finalLatestMap.get("dismiss-em-status")));
                                     data.setScore(Integer.parseInt(finalLatestMap.get("score")));
                                     data.setKills(Integer.parseInt(finalLatestMap.get("kills")));
-                                    data.setDeaths((Integer.parseInt(finalLatestMap.get("deaths"));
+                                    data.setDeaths(Integer.parseInt(finalLatestMap.get("deaths")));
 
                                     getLogger().info("Data for player " + event.getPlayer().getName() + " was uploaded.");
                                 }
