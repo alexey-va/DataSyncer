@@ -1,9 +1,9 @@
 name: DataSyncer
 version: '${project.version}'
 main: ru.mcfine.datasyncer.datasyncer.DataSyncer
-depend: [EliteMobs]
+softdepend: [EliteMobs, AureliumSkills, CMI]
 api-version: 1.19
 commands:
-  emsync:
+  datasync:
     description: Main command of the plugin.
     usage: Just use it.

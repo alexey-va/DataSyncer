@@ -1,6 +1,6 @@
-ip: 10.10.0.51
-port: 25565
-interval: 1
+ip: localhost
+port: 6379
+interval: 3
 username: "none"
 password: "none"
 load-data: true
@@ -10,4 +10,9 @@ server-names:
   - lobby
 
 server-name: lobby
-main-server-name: lobby
+main-server: true
+elite-mobs: true
+aurelium-skills: true
+cmi: true
+jobs: true
+

@@ -69,9 +69,27 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.Archy-X</groupId>
+            <artifactId>AureliumSkills</artifactId>
+            <version>master-459e0ff0c8-1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.magmaguy</groupId>
             <artifactId>EliteMobs</artifactId>
-            <version>8.3.7</version>
+            <version>8.3.9</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>zrips</groupId>
+            <artifactId>CMI</artifactId>
+            <version>8.7.8.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>zrips</groupId>
+            <artifactId>Jobs</artifactId>
+            <version>5.1.2.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
