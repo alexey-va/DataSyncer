@@ -109,6 +109,11 @@ public class AureliumSync extends Sync {
                     }
                 }
                 data.setMana(Double.parseDouble(map.get("mana")));
+                String abar = map.get("abar");
+                if(abar != null){
+                    if(Boolean.parseBoolean(abar)) AureliumAPI.getPlugin().getActionBar().getActionBarDisabled().add(player.getUniqueId());
+                    else AureliumAPI.getPlugin().getActionBar().getActionBarDisabled().remove(player.getUniqueId());
+                }
                 data.setShouldSave(true);
             }
         }.runTask(DataSyncer.plugin);
@@ -134,6 +139,8 @@ public class AureliumSync extends Sync {
         for (Map.Entry<Skill, Double> entry : data.getSkillXpMap().entrySet()) {
             map.put("XP:" + entry.getKey().name(), entry.getValue() + "");
         }
+        boolean isActionbarDisabled = AureliumAPI.getPlugin().getActionBar().getActionBarDisabled().contains(player.getUniqueId());
+        map.put("abar", isActionbarDisabled+"");
 
         long time = System.currentTimeMillis();
         map.put("timestamp", time + "");
