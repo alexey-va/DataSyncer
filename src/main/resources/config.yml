@@ -1,18 +1,27 @@
-ip: localhost
-port: 6379
-interval: 3
-username: "none"
-password: "none"
-load-data: true
-write-history: true
-server-names:
-  - survival
-  - lobby
+redis:
+  ip: localhost
+  port: 6379
+  username: "none"
+  password: "none"
 
-server-name: lobby
-main-server: true
-elite-mobs: true
-aurelium-skills: true
-cmi: true
-jobs: true
+
+servers:
+  this-server: lobby
+  main-server: true
+  server-names:
+    - survival
+    - lobby
+
+general:
+  ticks-per-cycle: 3
+  write-history: true
+  delay-cycles: 2
+
+integrations:
+  elite-mobs: true
+  aurelium-skills: true
+  cmi: true
+  jobs: true
+  stats: true
+
 

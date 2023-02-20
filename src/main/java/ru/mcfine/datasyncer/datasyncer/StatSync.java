@@ -1,6 +1,7 @@
 package ru.mcfine.datasyncer.datasyncer;
 
-import com.magmaguy.elitemobs.playerdata.database.PlayerData;
+import com.Zrips.CMI.CMI;
+import org.bukkit.Statistic;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -9,13 +10,11 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class EliteMobsSync extends Sync {
-
+public class StatSync extends Sync {
     protected static File historyFile;
     protected static FileConfiguration historyConfig;
     protected static ConcurrentLinkedQueue<Pair<Map<String, String>, Map<String, String>>> historyQueue = new ConcurrentLinkedQueue<>();
@@ -23,10 +22,10 @@ public class EliteMobsSync extends Sync {
     //protected static File file = null;
     //protected static FileConfiguration config;
 
-    public EliteMobsSync(Player player) {
+    public StatSync(Player player) {
         if (historyFile == null) {
             //file = new File(DataSyncer.plugin.getDataFolder() + File.separator + "aurelium_skills" + File.separator + "player_data.yml");
-            historyFile = new File(DataSyncer.plugin.getDataFolder() + File.separator + "elite_mobs" + File.separator + "history.yml");
+            historyFile = new File(DataSyncer.plugin.getDataFolder() + File.separator + "stats" + File.separator + "history.yml");
             try {
                 //file.getParentFile().mkdir();
                 //file.createNewFile();
@@ -62,11 +61,10 @@ public class EliteMobsSync extends Sync {
     }
 
 
-
     public void uploadData() {
         map = getValueMap();
-        if(map == null || map.size() == 0) return;
-        DataSyncer.plugin.pool.hset("EMData:" + DataSyncer.plugin.name + ":" + player.getUniqueId().toString(), map);
+        if (map.size() == 0) return;
+        DataSyncer.plugin.pool.hset("StatData:" + DataSyncer.plugin.name + ":" + player.getUniqueId().toString(), map);
         //if(config != null)config.set(player.getUniqueId().toString(), map);
     }
 
@@ -78,59 +76,44 @@ public class EliteMobsSync extends Sync {
         new BukkitRunnable() {
             @Override
             public void run() {
-                PlayerData data = PlayerData.getPlayerData(player.getUniqueId());
-
-                data.setCurrency(Double.parseDouble(finalMap.get("currency")));
-                data.setActiveGuildLevel(Integer.parseInt(finalMap.get("guild-level")));
-                data.setGuildPrestigeLevel(Integer.parseInt(finalMap.get("prestige")));
-                data.setHighestLevelKilled(Integer.parseInt(finalMap.get("highest-level-killed")));
-                data.setMaxGuildLevel(Integer.parseInt(finalMap.get("max-guild-level")));
-                data.setUseBookMenus(true);
-                data.setDismissEMStatusScreenMessage(Boolean.parseBoolean(finalMap.get("dismiss-em-status")));
-                data.setScore(Integer.parseInt(finalMap.get("score")));
-                data.setKills(Integer.parseInt(finalMap.get("kills")));
-                data.setDeaths(Integer.parseInt(finalMap.get("deaths")));
+                for (String statString : finalMap.keySet()) {
+                    if (statString.equals("timestamp") || statString.equals("name")) continue;
+                    try {
+                        Statistic statistic = Statistic.valueOf(statString);
+                        int val = Integer.parseInt(finalMap.get(statString));
+                        player.setStatistic(statistic, val);
+                    } catch (Exception ig) {
+                        System.out.println(statString);
+                        ig.printStackTrace();
+                    }
+                }
                 loaded = true;
                 applying = false;
+                player.saveData();
             }
         }.runTask(DataSyncer.plugin);
-        if(oldData == null) oldData = new HashMap<>();
-        oldData.put("name", player.getName());
         historyQueue.add(new Pair<>(oldData, finalMap));
     }
 
     protected boolean ifPluginLoaded() {
-        return PlayerData.isInMemory(player) && PlayerData.getPlayerData(player.getUniqueId()) != null;
+        return true;
     }
 
     private Map<String, String> getValueMap() {
-        PlayerData data = PlayerData.getPlayerData(player.getUniqueId());
-        if (data == null) return null;
+        Map<String, String> map = new ConcurrentHashMap<>();
+        for (Statistic statistic : Statistic.values()) {
+            if (stats.contains(statistic)) continue;
+            int stat;
+            try {
+                stat = player.getStatistic(statistic);
+            } catch (Exception ignored) {
+                continue;
+            }
+            map.put(statistic.name(), stat + "");
+        }
 
-        double currency = data.getCurrency();
-        int gl = data.getActiveGuildLevel();
-        int prestige = data.getGuildPrestigeLevel();
-        int hlk = data.getHighestLevelKilled();
-        int mgl = data.getMaxGuildLevel();
-        boolean book = PlayerData.getUseBookMenus(player.getUniqueId());
-        boolean dismiss = PlayerData.getDismissEMStatusScreenMessage(player.getUniqueId());
-        int deaths = data.getDeaths();
-        int kills = data.getKills();
-        int score = data.getScore();
         long time = System.currentTimeMillis();
-
-        Map<String, String> map = new HashMap<>();
-        map.put("currency", currency + "");
-        map.put("guild-level", gl + "");
-        map.put("prestige", prestige + "");
-        map.put("highest-level-killed", hlk + "");
-        map.put("max-guild-level", mgl + "");
-        map.put("use-book", book + "");
-        map.put("dismiss-em-status", dismiss + "");
         map.put("timestamp", time + "");
-        map.put("deaths", deaths + "");
-        map.put("kills", kills + "");
-        map.put("score", score + "");
         map.put("name", playerName);
         map.entrySet().forEach(entry -> {
             if(entry.getValue() == null) entry.setValue("null");
@@ -142,7 +125,7 @@ public class EliteMobsSync extends Sync {
         Map<String, String> latestMap = null;
         long latestMs = -1;
         for (String serverName : DataSyncer.plugin.serverNames) {
-            Map<String, String> map = DataSyncer.plugin.pool.hgetAll("EMData:" + serverName + ":" + player.getUniqueId().toString());
+            Map<String, String> map = DataSyncer.plugin.pool.hgetAll("StatData:" + serverName + ":" + player.getUniqueId().toString());
 
             if (map.size() == 0) continue;
             long ms = Long.parseLong(map.get("timestamp"));
@@ -151,7 +134,6 @@ public class EliteMobsSync extends Sync {
                 latestMs = ms;
             }
         }
-
         if (latestMap == null) {
             this.loaded = true;
             this.hasEntry = false;
@@ -190,6 +172,19 @@ public class EliteMobsSync extends Sync {
         }
     }
 
+    private final Set<Statistic> stats = new HashSet<>() {
+        {
+            add(Statistic.MINE_BLOCK);
+            add(Statistic.BREAK_ITEM);
+            add(Statistic.CRAFT_ITEM);
+            add(Statistic.USE_ITEM);
+            add(Statistic.PICKUP);
+            add(Statistic.DROP_COUNT);
+            add(Statistic.KILL_ENTITY);
+            add(Statistic.ENTITY_KILLED_BY);
+        }
+    };
+
 
     public static void clearTask() {
         //if (file == null) return;
@@ -200,5 +195,4 @@ public class EliteMobsSync extends Sync {
         historyFile = null;
         historyConfig = null;
     }
-
 }
